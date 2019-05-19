@@ -1,0 +1,212 @@
+/*=================================
+  =            Group 30           =
+  =================================*/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "rbt.h"
+#include "mylib.h"
+
+typedef enum { RED, BLACK } rbt_colour;
+#define IS_BLACK(x) ((NULL == (x)) || (BLACK == (x)->colour))
+#define IS_RED(x) ((NULL != (x)) && (RED == (x)->colour))
+
+struct rbtnode{
+    char *key;
+    rbt_colour colour;
+    rbt left;
+    rbt right;
+};
+
+/** 
+ *  Creates a new instance of an Red Black Tree and 
+ sets all of its values to NULL.
+ *  Returns a blank tree.
+ */
+rbt rbt_new(){
+    /*
+    struct rbtnode *b = NULL;
+    return b;
+    */
+    return NULL;
+}
+
+/** 
+ *  Rotates nodes to the right.
+ *  Involves the Root, Root->left, Root->left->right.
+ Root->right becomes Root.
+ Root becomes Root->left.
+ Root->right->left becomes Root->left->right.
+ *  @param - Red Black tree. a RBT gets passed in to be
+ man 
+ *  @return - A Red Black Tree that has been rotated to
+ the right.
+*/
+static rbt right_rotate(rbt b){
+    rbt temp = b;
+    b = b->left;
+    temp->left = b->right;
+    b->right = temp;
+    return b;
+}
+
+/** 
+ *  Rotates nodes to the left.
+ *  Involves the Root, Root->right, Root->right->left.
+ Root->left becomes Root.
+ Root becomes Root->right.
+ Root->left->right becomes Root->right->left.
+ *  @param - Red Black tree. a RBT gets passed in to be
+ manipulated.
+ *  @return - A Red Black Tree that has been rotated to
+ the left.
+*/
+static rbt left_rotate(rbt b){
+    rbt temp = b;
+    b = b->right;
+    temp->right = b->left;
+    b->left = temp;
+    return b;
+}
+
+/** 
+ *  Makes sure that the RBT is balanced and that it
+ takes the same number of black nodes to get to each
+ leaf node.
+ *  @param - A RBT gets passed in to be balanced.
+ *  @return - A RBT that has been balanced out.
+ *  Special note - Is a support function.
+ */
+static rbt rbt_fix(rbt b) {
+    if (IS_RED(b->left) && IS_RED(b->left->left)) {
+        if (IS_RED(b->right)) {
+            b->colour = RED;
+            b->left->colour = BLACK;
+            b->right->colour = BLACK;
+        } else {
+           b = right_rotate(b);
+           b->colour = BLACK;
+           b->right->colour = RED;
+        }
+    } else if (IS_RED(b->left) && IS_RED(b->left->right)) {
+        if (IS_RED(b->right)) {
+            b->colour = RED;
+            b->left->colour = BLACK;
+            b->right->colour = BLACK;
+        } else {
+            b->left = left_rotate(b->left);
+            b = right_rotate(b);
+            b->colour = BLACK;
+            b->right->colour = RED;
+        }
+    } else if (IS_RED(b->right) && IS_RED(b->right->left)) {
+        if (IS_RED(b->left)) {
+            b->colour = RED;
+            b->left->colour = BLACK;
+            b->right->colour = BLACK;
+        } else {
+            b->right = right_rotate(b->right);
+            b = left_rotate(b);
+            b->colour = BLACK;
+            b->left->colour = RED;
+        }
+    } else if (IS_RED(b->right) && IS_RED(b->right->right)) {
+        if (IS_RED(b->left)) {
+            b->colour = RED;
+            b->left->colour = BLACK;
+            b->right->colour = BLACK;
+        } else {
+            b = left_rotate(b);
+            b->colour = BLACK;
+            b->left->colour = RED;
+        }
+    }
+    return b;
+}
+
+
+/** 
+ *  Inserts a string into the node according to its value.
+ Lower values go to the left, higher values go to the right
+ and any duplicates get sent to the left.
+ *  @param - A RBT that is going to have a String added to it.
+ *  @param - A String that is to be inserted into the RBT.
+ *  @return - A RBT a new node added.
+ *  Special note - unlike a normal RBT or Binary Tree, this tree
+ can take duplicate items.
+*/
+rbt rbt_insert(rbt b, char *str){
+    if(b == NULL){
+        b = emalloc(sizeof *b);
+        b->colour = RED;
+        b->left = NULL;
+        b->right = NULL;
+        b->key = emalloc((strlen(str)+1)*sizeof (char));
+        strcpy(b->key, str);
+    }else if(strcmp(str,b->key) <= 0){
+        b->left = rbt_insert(b->left,str);
+    }else if(strcmp(str,b->key) > 0){
+        b->right = rbt_insert(b->right,str);
+    }
+    b = rbt_fix(b);
+    return b;
+
+}
+
+/** 
+ *  Searches RBT for a passed string to see if its in the tree.
+ *  @param - RBT tree that is being searched.
+ *  @param - A String that is being searched for int he RBT.
+ *  @return - A '1' if there is a matching string. '0' if no matching
+ strings are found.
+*/
+int rbt_search(rbt b, char *str){
+    if(b == NULL){
+        return 0;
+    }
+
+    if(strcmp(str,b->key) == 0){
+        return 1;
+    }else if(strcmp(str,b->key) <= 0){
+        return rbt_search(b->left,str);
+    }else if(strcmp(str,b->key) >= 0){
+        return rbt_search(b->right,str);
+    }
+    return 0;
+}
+
+/** 
+ *  Traverses through the tree in PreOrder traversal and prints out
+ the nodes keys along the way.
+ *  @param - RBT tree that is to be traversed.
+ *  @param - Function that will be used to manipulate some value inside
+ this function. In this case, a print function will be passed to print
+ out the keys.
+*/
+void rbt_preorder(rbt b, void f(char *str)){
+    if(b==NULL){
+        return;
+    }
+    f(b->key);
+    rbt_preorder(b->left, f);
+    rbt_preorder(b->right, f);
+}
+
+/** 
+ *  Frees the values and then the memory location for each node.
+ *  @param - The RBT that is too be freed.
+ *  @return - An empty tree.
+ *  Special note, tree is made recursively so it has to be freed 
+ recursively.
+*/
+rbt rbt_free(rbt b){
+    if(b != NULL){
+        rbt_free(b->left);
+        rbt_free(b->right);
+        free(b->key);
+        free(b);
+    }
+    return b;
+}

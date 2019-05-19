@@ -1,0 +1,60 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <getopt.h>
+
+#include "container.h"
+#include "rbt.h"
+#include "flexarray.h"
+#include "mylib.h"
+
+struct containerrec {
+	container_t type;
+	void *contents;
+};
+
+container container_new(container_t c_type){
+    container c = emalloc(sizeof *c);
+    c->type = c_type;
+    if(c->type == RED_BLACK_TREE){
+        c->contents = rbt_new();
+    }else{
+        c->contents = flexarray_new();
+    }
+    return c;
+}
+
+container container_add(container c, char *word) {
+	if (c->type == RED_BLACK_TREE) {
+		c->contents = rbt_insert(c->contents, word);
+	} else {
+		c->contents = flexarray_append(c->contents, word);
+	}
+	return c;
+}
+
+int container_search(container c, char *word){
+	int search;
+	if (c->type == RED_BLACK_TREE){
+		search = rbt_search(c->contents, word);
+	}else{
+		search = is_present(c->contents, word);
+	}
+	return search;
+}
+
+void container_free(container c){
+	if (c->type == RED_BLACK_TREE){
+		c->contents = rbt_free(c->contents);
+	}else{
+		c->contents = flexarray_free(c->contents);
+	}
+}
+
+
+void container_print(container c, void f(char *str)){
+	if (c->type == RED_BLACK_TREE){
+		rbt_preorder(c->contents, f);
+	}else{
+		visit(c->contents, f);
+	}
+}

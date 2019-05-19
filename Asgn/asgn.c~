@@ -1,0 +1,59 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <getopt.h>
+/*
+  #include "mylib.h"
+  #include "flexarray.h"
+  #include "htable.h"
+  #include "container.h"
+*/
+
+int main(int argc, char **argv){
+    const char *optstring;
+    char option;
+    
+    printf("Start");
+
+    optstring = "ars:pih";
+    option = getopt(argc, argv, optstring);
+    while ((option) != EOF) {
+        switch (option) {
+            case 'a':
+                printf("you print a\n");
+                break;
+			
+                /*
+                  case 'r':
+                  c->type = RED_BLACK_TREE;
+                */
+
+            case 's':
+                printf("you print s\n");
+                break;
+                /*
+                  case 'p':
+                  container_print(c, stout);
+
+                  case 'i':
+                  printf("Fill time: %d\n", fillTime);
+                  printf("Search time: %d\n", searchTime);
+                  printf("Unknown word%d\n: ", unknown_words_num);
+                */
+
+            case 'h':
+                fprintf(stderr, "Instructions on how to use this program:\n");
+                fprintf(stderr, "Option - Action Performed\n");
+                fprintf(stderr, "-r  Use a robust chaining method.\n");
+                fprintf(stderr, "-s table_size  Use table_size as hashtable size.\n");
+                fprintf(stderr, "-p  Print hash table.\n");
+                fprintf(stderr, "-i  Print info about how long it took to fill hash table.\n");
+                fprintf(stderr, "-h  Help.\n");
+                break;
+
+            default:
+                break;
+        }
+    }
+    printf("End");
+    return EXIT_SUCCESS;
+}

@@ -1,0 +1,25 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+
+prime is_prime(candi){
+    int n;
+    for(n; n<candi+1; n++){
+        if(candi%n == 0){
+            return 0;
+        }
+        return 1;
+    }
+
+    int main(void){
+        int candi =2;
+        int num_print = 0;
+        while (num_print < 200){
+            if(is_prime(candi)){
+                print candi;
+                num_print++;
+            }
+            candi++;
+        }
+        return EXIT_SUCCESS;
+    }
